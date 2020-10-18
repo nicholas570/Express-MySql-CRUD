@@ -131,6 +131,34 @@ app.put('/api/movies/:id', (req, res) => {
   );
 });
 
+// DELETE ROUTES
+
+// EMPLOYEE
+app.delete('/api/employees/:id', (req, res) => {
+  const idEmployee = req.params.id;
+
+  connection.query('DELETE FROM employee WHERE id = ?', [idEmployee], (err) => {
+    if (err) {
+      res.status(500).send('Erreur lors de la suppression');
+    } else {
+      res.sendStatus(200);
+    }
+  });
+});
+
+// MOVIE
+app.delete('/api/movies/:id', (req, res) => {
+  const idMovie = req.params.id;
+
+  connection.query('DELETE FROM movie WHERE id = ?', [idMovie], (err) => {
+    if (err) {
+      res.status(500).send('Erreu lors da la suppression du film');
+    } else {
+      res.sendStatus(200);
+    }
+  });
+});
+
 app.listen(port, (err) => {
   if (err) {
     throw new Error(err);

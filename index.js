@@ -14,7 +14,14 @@ app.use(
 
 // EMPLOYEE
 app.get('/api/employees', (req, res) => {
-  connection.query('SELECT * FROM employee', (err, results) => {
+  let sql = 'SELECT * FROM employee';
+  let sqlValues = [];
+
+  if (req.query.department) {
+    sql += ' WHERE department = ?';
+    sqlValues.push(req.query.department);
+  }
+  connection.query(sql, sqlValues, (err, results) => {
     if (err) {
       res.status(500).send('Something went wrong');
     } else {
@@ -26,21 +33,37 @@ app.get('/api/employees', (req, res) => {
 app.get('/api/employees/:id', (req, res) => {
   const idEmployee = req.params.id;
   connection.query(
-    `SELECT * FROM employee WHERE id = ${idEmployee}`,
+    `SELECT * FROM employee WHERE id = ?`,
+    [idEmployee],
     (err, result) => {
       if (err) {
-        console.log(err);
-        res.status(500).send('Something went wrong');
-      } else {
-        res.json(result);
+        return res.status(500).send('Something went wrong');
       }
+      if (result.length === 0) {
+        return res.status(404).send('Employee not found');
+      }
+      return res.json(result);
     }
   );
 });
 
 // MOVIE
 app.get('/api/movies', (req, res) => {
-  connection.query('SELECT * FROM movie', (err, result) => {
+  let sql = 'SELECT * FROM movie';
+  let sqlValues = [];
+
+  if (req.query.rating && req.query.genre) {
+    sql += ' WHERE rating = ? && genre = ?';
+    sqlValues.push(req.query.rating, req.query.genre);
+  } else if (req.query.rating) {
+    sql += ' WHERE rating = ?';
+    sqlValues.push(req.query.rating);
+  } else if (req.query.genre) {
+    sql += ' WHERE genre = ?';
+    sqlValues.push(req.query.genre);
+  }
+
+  connection.query(sql, sqlValues, (err, result) => {
     if (err) {
       res.status(500).send('Something went wrong');
     } else {
@@ -52,14 +75,16 @@ app.get('/api/movies', (req, res) => {
 app.get('/api/movies/:id', (req, res) => {
   const idMovie = req.params.id;
   connection.query(
-    `SELECT name FROM movie WHERE id = ${idMovie}`,
+    `SELECT name FROM movie WHERE id = ?`,
+    [idMovie],
     (err, result) => {
       if (err) {
-        console.log(err);
-        res.status(500).send('Something went wrong');
-      } else {
-        res.json(result);
+        return res.status(500).send('Something went wrong');
       }
+      if (!result.length) {
+        return res.status(404).send('Movie not found');
+      }
+      return res.json(result);
     }
   );
 });
